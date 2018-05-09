@@ -1,0 +1,30 @@
+{
+    "name": "root/php-playground",
+    "description": "PHP Playground",
+    "type": "project",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "hfx",
+            "email": "jssmith883@gmail.com"
+        }
+    ],
+    "require": {
+        "php": ">=7",
+        "doctrine/dbal": "^2.5",
+        "guzzlehttp/guzzle": "^6.3",
+        "monolog/monolog": "^1.23",
+        "phpoffice/phpexcel": "^1.8"
+    },
+    "repositories": {
+        "packagist": {
+            "type": "composer",
+            "url": "https://packagist.phpcomposer.com"
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "Knowlesys\\": "lib/"
+        }
+    }
+}
