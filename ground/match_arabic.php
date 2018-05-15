@@ -21,8 +21,19 @@ $stringContainsArabic = "https://www.youtube.com/123/بسم/abc/بيان بال�
 function processArabic($stringContainsArabic)
 {
     $regex = "/([\p{Arabic}\s]+)/iu";
-    $replace = "<w:r><w:rPr><w:rtl/></w:rPr><w:t>$1</w:t></w:r>";
-    $result = preg_replace($regex, $replace, $stringContainsArabic);
+    $arabicTpl = "<w:r><w:rPr><w:rtl/></w:rPr><w:t>%s</w:t></w:r>";
+    $normalTpl = "<w:r><w:t>%s</w:t></w:r>";
+
+    $pieces = preg_split($regex, $stringContainsArabic, -1, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY);
+    foreach ($pieces as &$piece) {
+        if (isContainsArabic($piece)) {
+            $piece = sprintf($arabicTpl, $piece);
+        } else {
+            $piece = sprintf($normalTpl, $piece);
+        }
+    }
+    // $result = preg_replace($regex, $replace, $stringContainsArabic);
+    $result = implode('', $pieces);
     return $result;
 }
 
@@ -35,7 +46,7 @@ function processArabic($stringContainsArabic)
  */
 function isContainsArabic($string)
 {
-    return preg_match("/\p{Arabic}/iu", $string) == 1;
+    return preg_match("/\p{Arabic}/iu", $string) > 0;
 }
 
 
