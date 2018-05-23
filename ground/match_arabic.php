@@ -8,7 +8,7 @@
 * Author: HFX 2018-05-11 15:21
 */
 
-$stringContainsArabic = "https://www.youtube.com/123/بسم/abc/بيان بالصفحات والمواد المرئية";
+$stringContainsArabic = "http://mobile.twitter.com/search/%23القبض_علي_جاسوس_قطري_باليمن";
 
 /**
  * 处理包含阿语（从右到左）的字符串
@@ -20,7 +20,7 @@ $stringContainsArabic = "https://www.youtube.com/123/بسم/abc/بيان بال�
  */
 function processArabic($stringContainsArabic)
 {
-    $regex = "/([\p{Arabic}\s]+)/iu";
+    $regex = "/([\p{Arabic}\s_-]+)/iu";
     $arabicTpl = "<w:r><w:rPr><w:rtl/></w:rPr><w:t>%s</w:t></w:r>";
     $normalTpl = "<w:r><w:t>%s</w:t></w:r>";
 
