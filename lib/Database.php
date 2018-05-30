@@ -22,9 +22,9 @@ use Doctrine\DBAL\DriverManager;
 class Database
 {
     static $defaultConfig = [
-        'dbname' => 'mymonitor',                // 数据库名
+        'dbname' => 'xxxx',                // 数据库名
         'user' => 'root',                    // 数据库用户名
-        'password' => 'poms@db',                // 数据库密码
+        'password' => 'xxx',                // 数据库密码
         'port' => 3306,                         // 端口号
         'host' => '192.168.1.119',              // 数据库地址
         'driver' => 'pdo_mysql',                // PDO驱动，固定为MySQL，请勿修改
