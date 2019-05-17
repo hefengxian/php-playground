@@ -25,14 +25,14 @@ $esClient = ClientBuilder::create()
     ->setHosts(['http://192.168.1.48:9200'])
     ->build();
 
-$startTime = strtotime('2019-05-13 12:38:00');
+$startTime = strtotime('2019-05-13 12:44:00');
 $stopTime = time();
 $format = 'Y-m-d H:i:s';
 
 
 while ($startTime < $stopTime) {
     $_currentTaskStart = microtime(true);
-    $condition = sprintf("ad.extracted_time between '%s' and '%s'", date($format, $startTime), date($format, $startTime + 119));
+    $condition = sprintf("ad.extracted_time between '%s' and '%s'", date($format, $startTime), date($format, $startTime + 59));
     echo sprintf('[%s] [start]本次任务查询条件: %s', date('Y-m-d H:i:s'), $condition), PHP_EOL;
 
     // 文章基本信息
@@ -93,7 +93,12 @@ while ($startTime < $stopTime) {
     }
 
     // file_put_contents('/home/hfx/Desktop/Temp/es_sample.json', json_encode($articles, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
-    $indexResponse = $esClient->bulk($params);
+    try {
+        $indexResponse = $esClient->bulk($params);
+    } catch (Exception $e) {
+        var_dump($e->getMessage());
+        exit;
+    }
 
     // 统计索引情况
     $took = $indexResponse['took'];
@@ -113,7 +118,7 @@ while ($startTime < $stopTime) {
     $indexCost = round((microtime(true) - $_indexStart) * 1000);
     echo sprintf("[%s] 本次索引耗时: %sms, 共处理: %s 篇文章", date('Y-m-d H:i:s'), $indexCost, count($articles)), PHP_EOL;
 
-    $startTime += 120;
+    $startTime += 60;
     $cost = round((microtime(true) - $_currentTaskStart) * 1000);
     echo sprintf("[%s] [end]本次查询任务总耗时: %sms, 共处理: %s 篇文章", date('Y-m-d H:i:s'), $cost, count($articles)), PHP_EOL, PHP_EOL;
 }
