@@ -20,7 +20,7 @@ function detectCharset($source)
 {
     // 直接从源码获取，获取不到再使用字符串检测（不准）
     $html5CharsetRegex = '/<meta\s+charset=["]?([0-9a-zA-Z-^>]+)["]?\s*[\/]?>/i';
-    $html4CharsetRegex = '/<meta\s+http-equiv=["]?content-type["]?\s+content=["]?text\/html;\s*charset=([0-9a-zA-Z-^>]+)["]?\s*[\/]?>/i';
+    $html4CharsetRegex = '/<meta\s+http-equiv=["\']?content-type["\']?\s+content=["\']?text\/html;\s*charset=([0-9a-zA-Z-^>]+)["\']?\s*[\/]?>/i';
 
     $charset = '';
     $matches = [];
@@ -52,12 +52,25 @@ function detectCharset($source)
     return $charset;
 }
 
-$htmlString = <<<EOF
+/*$htmlString = <<<EOF
 <head id="Head1"><meta http-equiv="Content-Type" content="text/html; charset=utf-8" /><title>
 	建发纸业报价_优质企业_资讯帖子_ - 中国制造交易网
 </title><meta name="description" content="中国制造交易网建发纸业专区，为您汇集了最全面最新的建发纸业信息,包括建发纸业价格信息,建发纸业厂家信息,建发纸业资讯等信息。" /><link rel="stylesheet" type="text/css" href="http://www.c-c.com/aversion2014/css/global.css?v1.222" /><link type="text/css" href="/page-hots/css/juhe.css?v1" rel="stylesheet" />
 <script type="text/javascript" src="http://www.c-c.com/aversion2014/js/jquery 1.7.1.js"></script>
 <script type="text/javascript" src="/page-hots/js/jquery.SuperSlide.2.1.1.js"></script>
+</head>
+EOF;*/
+$htmlString = <<<EOF
+<head>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta http-equiv='content-type' content='text/html; charset=big5'>
+<meta name='viewport' content='width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no'>
+<title>習近平：打造中阿命運共同體 - 香港文匯報</title>
+<meta name="title" content="習近平：打造中阿命運共同體">
+<meta name='description' content='習近平：打造中阿命運共同體'>
+<link rel='stylesheet' type='text/css' href='//assets.wenweipo.com/news/css/detail.css'>
+<link rel="stylesheet" type="text/css" href="//assets.wenweipo.com/share/css/share.min.css">
+<script type=text/javascript src='http://ad.wenweipo.com/adjs/modiaAdsHeader.js'></script>
 </head>
 EOF;
 

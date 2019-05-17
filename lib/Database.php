@@ -10,8 +10,9 @@
 
 namespace Knowlesys;
 
+use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\DriverManager;
-
+use Throwable;
 
 
 /**
@@ -22,11 +23,11 @@ use Doctrine\DBAL\DriverManager;
 class Database
 {
     static $defaultConfig = [
-        'dbname' => 'xxxx',                // 数据库名
+        'dbname' => 'mymonitor',                // 数据库名
         'user' => 'root',                    // 数据库用户名
-        'password' => 'xxx',                // 数据库密码
+        'password' => 'poms@db',                // 数据库密码
         'port' => 3306,                         // 端口号
-        'host' => '192.168.1.119',              // 数据库地址
+        'host' => '192.168.1.116',              // 数据库地址
         'driver' => 'pdo_mysql',                // PDO驱动，固定为MySQL，请勿修改
         'charset' => 'UTF8',                    // 数据库使用编码
         'driverOptions' => [
@@ -37,11 +38,16 @@ class Database
 
     /**
      * @param array|null $config 配置
-     * @return \Doctrine\DBAL\Connection
+     * @return Connection
      */
     public static function getConnection($config = null)
     {
         $config = empty($config) ? self::$defaultConfig : $config;
-        return DriverManager::getConnection($config);
+        try {
+            $conn = DriverManager::getConnection($config);
+        } catch (Throwable $e) {
+            $conn = false;
+        }
+        return $conn;
     }
 }
