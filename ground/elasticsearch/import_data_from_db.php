@@ -28,8 +28,8 @@ $esClient = ClientBuilder::create()
     ])
     ->build();
 
-$startTime = strtotime('2019-05-17 16:08:00');
-$stopTime = time();
+$startTime = strtotime('2019-05-17 17:08:00');
+$stopTime = strtotime('2019-05-17 23:59:59');
 $format = 'Y-m-d H:i:s';
 
 
@@ -51,7 +51,7 @@ while ($startTime < $stopTime) {
     $tags = getTag($db, $condition);
 
     // 映射信息
-    $_indexStart = microtime(true);
+    $_dataProcessStart = microtime(true);
     $params = [];
     foreach ($articles as &$article) {
         $params['body'][] = [
@@ -98,6 +98,8 @@ while ($startTime < $stopTime) {
     }
 
     // file_put_contents('/home/hfx/Desktop/Temp/es_sample.json', json_encode($articles, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+    $dataProcessCost = round((microtime(true) - $_dataProcessStart) * 1000);
+    echo sprintf("[%s] 本次处理数据耗时: %sms, 共处理: %s 篇文章", date('Y-m-d H:i:s'), $dataProcessCost, count($articles)), PHP_EOL;
     try {
         $indexResponse = $esClient->bulk($params);
     } catch (Exception $e) {
@@ -119,9 +121,6 @@ while ($startTime < $stopTime) {
         $statisticParts[] = "$rs: " . count($stats);
     }
     echo sprintf("[%s] 索引结果统计 %s", date('Y-m-d H:i:s'), implode(', ', $statisticParts)), PHP_EOL;
-
-    $indexCost = round((microtime(true) - $_indexStart) * 1000);
-    echo sprintf("[%s] 本次索引耗时: %sms, 共处理: %s 篇文章", date('Y-m-d H:i:s'), $indexCost, count($articles)), PHP_EOL;
 
     $startTime += 120;
     $cost = round((microtime(true) - $_currentTaskStart) * 1000);
