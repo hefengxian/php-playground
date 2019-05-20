@@ -19,13 +19,16 @@ error_reporting(E_ERROR);
 set_time_limit(0);
 ini_set('memory_limit', -1);
 
-$dbConfig = array_merge(Database::$defaultConfig, ['host' => '192.168.1.119']);
+$dbConfig = array_merge(Database::$defaultConfig, ['host' => '192.168.1.116']);
 $db = Database::getConnection($dbConfig);
 $esClient = ClientBuilder::create()
-    ->setHosts(['http://192.168.1.48:9200'])
+    ->setHosts([
+        'http://192.168.1.47:9200',
+        'http://192.168.1.48:9200'
+    ])
     ->build();
 
-$startTime = strtotime('2019-05-13 12:44:00');
+$startTime = strtotime('2019-05-17 15:03:00');
 $stopTime = time();
 $format = 'Y-m-d H:i:s';
 
@@ -68,20 +71,22 @@ while ($startTime < $stopTime) {
         // NULL 要转换
 
         $article['Operation'] = [];
-        foreach ($operations as $operation) {
+        foreach ($operations as $oKey => $operation) {
             if ($article['Article_Detail_ID'] == $operation['Article_Detail_ID']) {
                 // 转 Boolean
                 $operation['User_Need_Extract_Reply'] = $operation['User_Need_Extract_Reply'] > 0;
                 $article['Operation'][] = $operation;
+                unset($operations[$oKey]);
             }
         }
 
         $article['Subject_Stat'] = [];
-        foreach ($subjects as $subject) {
+        foreach ($subjects as $sKey => $subject) {
             if ($article['Article_Detail_ID'] == $subject['Article_Detail_ID']) {
                 // 转 Boolean
                 $subject['Is_Valid'] = $subject['Is_Valid'] > 0;
                 $article['Subject_Stat'][] = $subject;
+                unset($subjects[$sKey]);
             }
         }
 
@@ -100,7 +105,7 @@ while ($startTime < $stopTime) {
         exit;
     }
 
-    // 统计索引情况
+    // 统计索引情况2019-05-13 23:12:00
     $took = $indexResponse['took'];
     $indexStatistics = [];
     foreach ($indexResponse['items'] as $respItem) {
