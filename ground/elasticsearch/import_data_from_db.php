@@ -28,14 +28,14 @@ $esClient = ClientBuilder::create()
     ])
     ->build();
 
-$startTime = strtotime('2019-05-17 15:03:00');
+$startTime = strtotime('2019-05-17 16:08:00');
 $stopTime = time();
 $format = 'Y-m-d H:i:s';
 
 
 while ($startTime < $stopTime) {
     $_currentTaskStart = microtime(true);
-    $condition = sprintf("ad.extracted_time between '%s' and '%s'", date($format, $startTime), date($format, $startTime + 59));
+    $condition = sprintf("between '%s' and '%s'", date($format, $startTime), date($format, $startTime + 119));
     echo sprintf('[%s] [start]本次任务查询条件: %s', date('Y-m-d H:i:s'), $condition), PHP_EOL;
 
     // 文章基本信息
@@ -123,7 +123,7 @@ while ($startTime < $stopTime) {
     $indexCost = round((microtime(true) - $_indexStart) * 1000);
     echo sprintf("[%s] 本次索引耗时: %sms, 共处理: %s 篇文章", date('Y-m-d H:i:s'), $indexCost, count($articles)), PHP_EOL;
 
-    $startTime += 60;
+    $startTime += 120;
     $cost = round((microtime(true) - $_currentTaskStart) * 1000);
     echo sprintf("[%s] [end]本次查询任务总耗时: %sms, 共处理: %s 篇文章", date('Y-m-d H:i:s'), $cost, count($articles)), PHP_EOL, PHP_EOL;
 }
@@ -195,7 +195,7 @@ function getArticleDetail(Connection $db, $condition)
     $query = $db->createQueryBuilder();
     $query->select(implode(',', $fields))
         ->from('article_detail', 'ad')
-        ->where($condition);
+        ->where("ad.Extracted_Time {$condition}");
 
     $leftJoins = [
         ['ad', 'article_number', 'an', 'an.Article_Record_MD5_ID=ad.Record_MD5_ID'],
@@ -261,17 +261,16 @@ function getStatSubject(Connection $db, $condition)
         $query = $db->createQueryBuilder()
             ->select(implode(',', $fields))
             ->from($tableName, 'sas')
-            ->where($condition);
+            ->where("Article_Extracted_Time {$condition}");
 
         // join 的表
         $leftJoins = [
-            ['sas', 'article_detail', 'ad', 'sas.Article_Detail_ID=ad.Article_Detail_ID'],
+            // ['sas', 'article_detail', 'ad', 'sas.Article_Detail_ID=ad.Article_Detail_ID'],
         ];
         foreach ($leftJoins as $leftJoin) {
             $query->leftJoin($leftJoin[0], $leftJoin[1], $leftJoin[2], $leftJoin[3]);
         }
 
-        // echo $query->getSQL();exit;
         $rst = $query->execute()
             ->fetchAll();
 
@@ -320,11 +319,11 @@ function getOperation(Connection $db, $condition)
     $query = $db->createQueryBuilder()
         ->select(implode(',', $fields))
         ->from('article_operation', 'ao')
-        ->where($condition);
+        ->where("Article_Extracted_Time {$condition}");
 
     // join 的表
     $leftJoins = [
-        ['ao', 'article_detail', 'ad', 'ao.Article_Detail_ID=ad.Article_Detail_ID'],
+        // ['ao', 'article_detail', 'ad', 'ao.Article_Detail_ID=ad.Article_Detail_ID'],
     ];
     foreach ($leftJoins as $leftJoin) {
         $query->leftJoin($leftJoin[0], $leftJoin[1], $leftJoin[2], $leftJoin[3]);
@@ -364,7 +363,7 @@ function getTag(Connection $db, $condition)
     $query = $db->createQueryBuilder()
         ->select(implode(',', $fields))
         ->from('article_tag', 'at')
-        ->where($condition);
+        ->where("ad.Extracted_Time {$condition}");
 
     // join 的表
     $leftJoins = [
