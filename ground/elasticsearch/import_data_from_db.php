@@ -20,7 +20,6 @@ ini_set('memory_limit', -1);
 
 
 $startTimeFile = __DIR__ . '/start_time.txt';
-
 $startTimeString = @file_get_contents($startTimeFile);
 
 if ($startTimeString === false) {
@@ -154,6 +153,7 @@ while ($startTime < $stopTime) {
 function getArticleDetail(Connection $db, $condition)
 {
     $_start = microtime(true);
+    $format = 'Y-m-d H:i:s';
     $fields = [
         'IFNULL(ac.Article_Abstract, ad.Article_Abstract)       AS Article_Abstract',
         'ad.Article_Abstract_FingerPrint',
@@ -252,6 +252,7 @@ function getArticleDetail(Connection $db, $condition)
 function getStatSubject(Connection $db, $condition)
 {
     $_start = microtime(true);
+    $format = 'Y-m-d H:i:s';
     $fields = [
         'sas.Article_Detail_ID',
         'sas.Client_ID',
@@ -311,6 +312,7 @@ function getStatSubject(Connection $db, $condition)
 function getOperation(Connection $db, $condition)
 {
     $_start = microtime(true);
+    $format = 'Y-m-d H:i:s';
     $fields = [
         'ao.Article_Detail_ID',
         // 'ao.Article_Extracted_Time',
@@ -365,6 +367,7 @@ function getOperation(Connection $db, $condition)
 function getTag(Connection $db, $condition)
 {
     $_start = microtime(true);
+    $format = 'Y-m-d H:i:s';
     $fields = [
         'at.Article_Detail_ID',
         't.Article_Count',
@@ -408,6 +411,7 @@ function getTag(Connection $db, $condition)
 function template(Connection $db, $condition)
 {
     $_start = microtime(true);
+    $format = 'Y-m-d H:i:s';
     $fields = [];
     $query = $db->createQueryBuilder()
         ->select(implode(',', $fields))
