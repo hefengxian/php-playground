@@ -12,12 +12,32 @@ use Doctrine\DBAL\Connection;
 use Elasticsearch\ClientBuilder;
 use Knowlesys\Database;
 
-
-include_once '../../vendor/autoload.php';
+include_once __DIR__ . '/../../vendor/autoload.php';
 
 error_reporting(E_ERROR);
 set_time_limit(0);
 ini_set('memory_limit', -1);
+
+
+$startTimeFile = __DIR__ . '/start_time.txt';
+
+$startTimeString = @file_get_contents($startTimeFile);
+
+if ($startTimeString === false) {
+    echo "没有发现 `$startTimeFile` 文件" . PHP_EOL;
+    exit;
+}
+
+$format = 'Y-m-d H:i:s';
+$startTime = strtotime($startTimeString);
+// $startTime = strtotime('2019-05-20 12:00:00');
+$stopTime = time() - (3 * 60);
+if ($startTime >= $stopTime) {
+    // 时间不够，等待下一次执行
+    exit;
+}
+// 将当前截止时间写入到文件
+@file_put_contents($startTimeFile, date($format, $stopTime));
 
 $dbConfig = array_merge(Database::$defaultConfig, ['host' => '192.168.1.116']);
 $db = Database::getConnection($dbConfig);
@@ -28,15 +48,11 @@ $esClient = ClientBuilder::create()
     ])
     ->build();
 
-$startTime = strtotime('2019-05-17 17:08:00');
-$stopTime = strtotime('2019-05-17 23:59:59');
-$format = 'Y-m-d H:i:s';
-
 
 while ($startTime < $stopTime) {
     $_currentTaskStart = microtime(true);
     $condition = sprintf("between '%s' and '%s'", date($format, $startTime), date($format, $startTime + 119));
-    echo sprintf('[%s] [start]本次任务查询条件: %s', date('Y-m-d H:i:s'), $condition), PHP_EOL;
+    echo sprintf('[%s] [start]本次任务查询条件: %s', date($format), $condition), PHP_EOL;
 
     // 文章基本信息
     $articles = getArticleDetail($db, $condition);
@@ -99,7 +115,7 @@ while ($startTime < $stopTime) {
 
     // file_put_contents('/home/hfx/Desktop/Temp/es_sample.json', json_encode($articles, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
     $dataProcessCost = round((microtime(true) - $_dataProcessStart) * 1000);
-    echo sprintf("[%s] 本次处理数据耗时: %sms, 共处理: %s 篇文章", date('Y-m-d H:i:s'), $dataProcessCost, count($articles)), PHP_EOL;
+    echo sprintf("[%s] 本次处理数据耗时: %sms, 共处理: %s 篇文章", date($format), $dataProcessCost, count($articles)), PHP_EOL;
     try {
         $indexResponse = $esClient->bulk($params);
     } catch (Exception $e) {
@@ -120,11 +136,11 @@ while ($startTime < $stopTime) {
     foreach ($indexStatistics as $rs => $stats) {
         $statisticParts[] = "$rs: " . count($stats);
     }
-    echo sprintf("[%s] 索引结果统计 %s", date('Y-m-d H:i:s'), implode(', ', $statisticParts)), PHP_EOL;
+    echo sprintf("[%s] 索引结果统计 %s", date($format), implode(', ', $statisticParts)), PHP_EOL;
 
     $startTime += 120;
     $cost = round((microtime(true) - $_currentTaskStart) * 1000);
-    echo sprintf("[%s] [end]本次查询任务总耗时: %sms, 共处理: %s 篇文章", date('Y-m-d H:i:s'), $cost, count($articles)), PHP_EOL, PHP_EOL;
+    echo sprintf("[%s] [end]本次查询任务总耗时: %sms, 共处理: %s 篇文章", date($format), $cost, count($articles)), PHP_EOL, PHP_EOL;
 }
 
 
@@ -221,7 +237,7 @@ function getArticleDetail(Connection $db, $condition)
         ->fetchAll();
     $cost = round((microtime(true) - $_start) * 1000);
 
-    echo sprintf("[%s] 获取文章基础信息耗时: %sms, fetched count: %s", date('Y-m-d H:i:s'), $cost, count($rst)), PHP_EOL;
+    echo sprintf("[%s] 获取文章基础信息耗时: %sms, fetched count: %s", date($format), $cost, count($rst)), PHP_EOL;
     return $rst;
 }
 
@@ -279,7 +295,7 @@ function getStatSubject(Connection $db, $condition)
     }
 
     $cost = round((microtime(true) - $_start) * 1000);
-    echo sprintf("[%s] 获取文章所有分类信息耗时: %sms, fetched count: %s", date('Y-m-d H:i:s'), $cost, count($result)), PHP_EOL;
+    echo sprintf("[%s] 获取文章所有分类信息耗时: %sms, fetched count: %s", date($format), $cost, count($result)), PHP_EOL;
 
     return $result;
 }
@@ -333,7 +349,7 @@ function getOperation(Connection $db, $condition)
         ->fetchAll();
 
     $cost = round((microtime(true) - $_start) * 1000);
-    echo sprintf("[%s] 获取操作信息耗时: %sms, fetched count: %s", date('Y-m-d H:i:s'), $cost, count($rst)), PHP_EOL;
+    echo sprintf("[%s] 获取操作信息耗时: %sms, fetched count: %s", date($format), $cost, count($rst)), PHP_EOL;
 
     return $rst;
 }
@@ -378,7 +394,7 @@ function getTag(Connection $db, $condition)
         ->fetchAll();
 
     $cost = round((microtime(true) - $_start) * 1000);
-    echo sprintf("[%s] 获取文章标签耗时: %sms, fetched count: %s", date('Y-m-d H:i:s'), $cost, count($rst)), PHP_EOL;
+    echo sprintf("[%s] 获取文章标签耗时: %sms, fetched count: %s", date($format), $cost, count($rst)), PHP_EOL;
 
     return $rst;
 }
@@ -411,7 +427,7 @@ function template(Connection $db, $condition)
         ->fetchAll();
 
     $cost = round((microtime(true) - $_start) * 1000);
-    echo sprintf("[%s] 耗时: %sms, fetched count: %s", date('Y-m-d H:i:s'), $cost, count($rst)), PHP_EOL;
+    echo sprintf("[%s] 耗时: %sms, fetched count: %s", date($format), $cost, count($rst)), PHP_EOL;
 
     return $rst;
 }
