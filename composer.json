@@ -22,7 +22,7 @@
     "repositories": {
         "packagist": {
             "type": "composer",
-            "url": "https://packagist.ls-china.org"
+            "url": "https://packagist.laravel-china.org"
         }
     },
     "autoload": {

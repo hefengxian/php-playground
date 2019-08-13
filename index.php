@@ -50,12 +50,22 @@ error_reporting(E_ALL);
 // var_dump(count($files));
 // var_dump($files);
 
-$array1 = array(0 => 'zero_a', 2 => 'two_a', 3 => 'three_a');
-$array2 = array(1 => 'one_b', 3 => 'three_b', 4 => 'four_b');
-$result = array_merge($array1, $array2);
-var_dump($result);
+$arr = [
+    "الشيخ",
+    "البمنا",
+    "رياض",
+    "مكّةمكرمة",
+    "IS",
+    "انفجار",
+    "رعب",
+];
 
-
+$str = "";
+foreach ($arr as &$word) {
+    $word =  '"' . $word . '"' . '^100' ;
+}
+"";
+var_dump($arr);
 
 
 
