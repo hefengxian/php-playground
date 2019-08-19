@@ -16,13 +16,13 @@
         "monolog/monolog": "^1.23",
         "phpoffice/phpexcel": "^1.8",
         "slim/slim": "^3.10",
-        "solarium/solarium": "^4.0",
+        "solarium/solarium": "^5.0",
         "elasticsearch/elasticsearch": "^6.7"
     },
     "repositories": {
         "packagist": {
             "type": "composer",
-            "url": "https://packagist.laravel-china.org"
+            "url": "https://mirrors.aliyun.com/composer/"
         }
     },
     "autoload": {
