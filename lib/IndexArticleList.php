@@ -43,6 +43,8 @@ class IndexArticleList
 
 
     /**
+     * 运行的主方法
+     *
      * @param int $startTime
      * @param int $endTime
      * @throws \Doctrine\DBAL\DBALException
@@ -56,8 +58,9 @@ class IndexArticleList
         echo sprintf('[%s] [start]本次任务查询条件: %s', date($format), $condition), PHP_EOL;
 
         // 检查采集时间确定索引已经创建
-        $timeRange = $this->getExtractedTimeRange($condition);
-        $this->createIndex($timeRange['min_time'], $timeRange['max_time']);
+        // 经过实测发现，分类表中的采集时间并不准确
+        // $timeRange = $this->getExtractedTimeRange($condition);
+        // $this->createIndexByTime($timeRange['min_time'], $timeRange['max_time']);
 
         // 获取到需要同步的 ID 之后对索引进行修改或者更新
         $articleIDs = $this->getArticleIDNeedToSync($condition);
@@ -75,14 +78,17 @@ class IndexArticleList
             // 已经删除的标记信息，与客户对应
             $deletedArticles = $this->getDeleted($ids);
 
-
             $_dataProcessStart = microtime(true);
             $params = [];
+            $indexNames = [];
             foreach ($articles as &$article) {
                 $extractedDate = explode(' ', $article['Extracted_Time'])[0];
+                $indexName = self::INDEX_PREFIX . $extractedDate;
+                // 用来获取所有的索引名称
+                $indexNames[$indexName] = 0;
                 $params['body'][] = [
                     'index' => [
-                        '_index' => self::INDEX_PREFIX . $extractedDate,
+                        '_index' => $indexName,
                         '_id' => $article['Article_Detail_ID'],
                     ]
                 ];
@@ -123,6 +129,9 @@ class IndexArticleList
 
             $dataProcessCost = round((microtime(true) - $_dataProcessStart));
             echo sprintf("[%s] 本次处理数据耗时: %ss, 共处理: %s 篇文章", date($format), $dataProcessCost, count($articles)), PHP_EOL;
+
+            // 索引数据之前，检查索引是否存在，不存在要创建一个
+            $this->createIndexByNames(array_keys($indexNames));
 
             try {
                 $indexResponse = $this->esClient->bulk($params);
@@ -500,200 +509,15 @@ class IndexArticleList
     }
 
 
-    public function createIndex($startDatetime, $endDatetime)
+    /**
+     * 通过一系列索引的名称创建索引
+     *
+     * @param array $names 名称数组
+     */
+    public function createIndexByNames(array $names)
     {
-        $start = strtotime(explode(' ', $startDatetime)[0]);
-        $end = strtotime(explode(' ', $endDatetime)[0]);
-
-        $createIndexJSON = <<<EOF
-{
-  "settings": {
-    "analysis": {
-      "analyzer": {
-        "cn_analyzer": {
-          "type": "custom",
-          "tokenizer": "ik_max_word",
-          "char_filter": [
-            "html_strip"
-          ],
-          "filter": [
-            "lowercase"
-          ]
-        }
-      }
-    }
-  },
-  "mappings": {
-    "properties": {
-      "Article_Detail_ID": {
-        "type": "long"
-      },
-      "Website_No": {
-        "type": "keyword"
-      },
-      "Media_Type_Code": {
-        "type": "keyword"
-      },
-      "Article_URL_MD5_ID": {
-        "type": "keyword"
-      },
-      "Domain_Code": {
-        "type": "keyword"
-      },
-      "Article_Title": {
-        "type": "text",
-        "analyzer": "cn_analyzer",
-        "search_analyzer": "ik_smart",
-        "fielddata": true
-      },
-      "Article_Abstract": {
-        "type": "text",
-        "analyzer": "cn_analyzer",
-        "search_analyzer": "ik_smart",
-        "fielddata": true
-      },
-      "Record_MD5_ID": {
-        "type": "keyword"
-      },
-      "Article_Title_FingerPrint": {
-        "type": "keyword"
-      },
-      "Article_Abstract_FingerPrint": {
-        "type": "keyword"
-      },
-      "Microblog_Type": {
-        "type": "keyword"
-      },
-      "Article_PubTime": {
-        "type": "date",
-        "format": "yyyy-MM-dd HH:mm:ss"
-      },
-      "Language_Code": {
-        "type": "keyword"
-      },
-      "Extracted_Time": {
-        "type": "date",
-        "format": "yyyy-MM-dd HH:mm:ss"
-      },
-      "Article_Content": {
-        "type": "text",
-        "analyzer": "cn_analyzer",
-        "search_analyzer": "ik_smart",
-        "fielddata": true
-      },
-      "Article_Content_FingerPrint": {
-        "type": "keyword"
-      },
-      "City_Area_Code": {
-        "type": "keyword"
-      },
-      "Country_Code": {
-        "type": "keyword"
-      },
-      "District_Area_Code": {
-        "type": "keyword"
-      },
-      "Province_Area_Code": {
-        "type": "keyword"
-      },
-      "Subject_Stat": {
-        "type": "nested",
-        "properties": {
-          "Article_Detail_ID": {
-            "type": "long"
-          },
-          "Client_ID": {
-            "type": "long"
-          },
-          "Created_Time": {
-            "type": "date",
-            "format": "yyyy-MM-dd HH:mm:ss"
-          },
-          "Emotion_Type": {
-            "type": "byte"
-          },
-          "Is_Valid": {
-            "type": "boolean"
-          },
-          "Junk_Score": {
-            "type": "short"
-          },
-          "Relative_Score": {
-            "type": "short"
-          },
-          "Sentiment_Score": {
-            "type": "short"
-          },
-          "Similar_Record_Oldest_ID": {
-            "type": "long"
-          },
-          "Subject_ID": {
-            "type": "long"
-          },
-          "Total_Score": {
-            "type": "short"
-          }
-        }
-      },
-      "Operation": {
-        "type": "nested",
-        "properties": {
-          "Article_Detail_ID": {
-            "type": "long"
-          },
-          "Client_ID": {
-            "type": "long"
-          },
-          "Followup_Status": {
-            "type": "keyword"
-          },
-          "User_Confirm_Emotion_Type": {
-            "type": "byte"
-          },
-          "User_Last_Process_Time": {
-            "type": "date",
-            "format": "yyyy-MM-dd HH:mm:ss"
-          },
-          "User_Process_Status": {
-            "type": "keyword"
-          }
-        }
-      },
-      "Tag": {
-        "type": "nested",
-        "properties": {
-          "Article_Detail_ID": {
-            "type": "long"
-          },
-          "Client_ID": {
-            "type": "long"
-          },
-          "Tag_ID": {
-            "type": "long"
-          }
-        }
-      },
-      "Deleted": {
-        "type": "nested",
-        "properties": {
-          "Article_Detail_ID": {
-            "type": "long"
-          },
-          "Client_ID": {
-            "type": "long"
-          },
-          "Article_Deleted_ID": {
-            "type": "long"
-          }
-        }
-      }
-    }
-  }
-}
-EOF;
-
-        for ($start; $start <= $end; $start += (60 * 60 * 24)) {
-            $indexName = self::INDEX_PREFIX . date(self::DATE_FORMAT, $start);
+        $createIndexJSON = file_get_contents(__DIR__ . '/kwm-list-mapping.json');
+        foreach ($names as $indexName) {
             // 检查是否存在
             $exists = $this->esClient->indices()->exists(['index' => $indexName]);
             if (!$exists) {
@@ -707,10 +531,21 @@ EOF;
     }
 
 
-    public function getMaxClassifiedTimeFromIndex($indexName)
+    /**
+     * 通过一个时间范围，按天创建一定规则的索引
+     *
+     * @param string $startDatetime 开始时间
+     * @param string $endDatetime 结束时间
+     */
+    public function createIndexByTime($startDatetime, $endDatetime)
     {
-        $this->esClient->search([
-            'index' => '',
-        ]);
+        $start = strtotime(explode(' ', $startDatetime)[0]);
+        $end = strtotime(explode(' ', $endDatetime)[0]);
+
+        $names = [];
+        for ($start; $start <= $end; $start += (60 * 60 * 24)) {
+            $names[] = self::INDEX_PREFIX . date(self::DATE_FORMAT, $start);
+        }
+        $this->createIndexByNames($names);
     }
 }

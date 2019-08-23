@@ -1,0 +1,184 @@
+{
+  "settings": {
+    "analysis": {
+      "analyzer": {
+        "cn_analyzer": {
+          "type": "custom",
+          "tokenizer": "ik_max_word",
+          "char_filter": [
+            "html_strip"
+          ],
+          "filter": [
+            "lowercase"
+          ]
+        }
+      }
+    }
+  },
+  "mappings": {
+    "properties": {
+      "Article_Detail_ID": {
+        "type": "long"
+      },
+      "Website_No": {
+        "type": "keyword"
+      },
+      "Media_Type_Code": {
+        "type": "keyword"
+      },
+      "Article_URL_MD5_ID": {
+        "type": "keyword"
+      },
+      "Domain_Code": {
+        "type": "keyword"
+      },
+      "Article_Title": {
+        "type": "text",
+        "analyzer": "cn_analyzer",
+        "search_analyzer": "ik_smart",
+        "fielddata": true
+      },
+      "Article_Abstract": {
+        "type": "text",
+        "analyzer": "cn_analyzer",
+        "search_analyzer": "ik_smart",
+        "fielddata": true
+      },
+      "Record_MD5_ID": {
+        "type": "keyword"
+      },
+      "Article_Title_FingerPrint": {
+        "type": "keyword"
+      },
+      "Article_Abstract_FingerPrint": {
+        "type": "keyword"
+      },
+      "Microblog_Type": {
+        "type": "keyword"
+      },
+      "Article_PubTime": {
+        "type": "date",
+        "format": "yyyy-MM-dd HH:mm:ss"
+      },
+      "Language_Code": {
+        "type": "keyword"
+      },
+      "Extracted_Time": {
+        "type": "date",
+        "format": "yyyy-MM-dd HH:mm:ss"
+      },
+      "Article_Content": {
+        "type": "text",
+        "analyzer": "cn_analyzer",
+        "search_analyzer": "ik_smart",
+        "fielddata": true
+      },
+      "Article_Content_FingerPrint": {
+        "type": "keyword"
+      },
+      "City_Area_Code": {
+        "type": "keyword"
+      },
+      "Country_Code": {
+        "type": "keyword"
+      },
+      "District_Area_Code": {
+        "type": "keyword"
+      },
+      "Province_Area_Code": {
+        "type": "keyword"
+      },
+      "Subject_Stat": {
+        "type": "nested",
+        "properties": {
+          "Article_Detail_ID": {
+            "type": "long"
+          },
+          "Client_ID": {
+            "type": "long"
+          },
+          "Created_Time": {
+            "type": "date",
+            "format": "yyyy-MM-dd HH:mm:ss"
+          },
+          "Emotion_Type": {
+            "type": "byte"
+          },
+          "Is_Valid": {
+            "type": "boolean"
+          },
+          "Junk_Score": {
+            "type": "short"
+          },
+          "Relative_Score": {
+            "type": "short"
+          },
+          "Sentiment_Score": {
+            "type": "short"
+          },
+          "Similar_Record_Oldest_ID": {
+            "type": "long"
+          },
+          "Subject_ID": {
+            "type": "long"
+          },
+          "Total_Score": {
+            "type": "short"
+          }
+        }
+      },
+      "Operation": {
+        "type": "nested",
+        "properties": {
+          "Article_Detail_ID": {
+            "type": "long"
+          },
+          "Client_ID": {
+            "type": "long"
+          },
+          "Followup_Status": {
+            "type": "keyword"
+          },
+          "User_Confirm_Emotion_Type": {
+            "type": "byte"
+          },
+          "User_Last_Process_Time": {
+            "type": "date",
+            "format": "yyyy-MM-dd HH:mm:ss"
+          },
+          "User_Process_Status": {
+            "type": "keyword"
+          }
+        }
+      },
+      "Tag": {
+        "type": "nested",
+        "properties": {
+          "Article_Detail_ID": {
+            "type": "long"
+          },
+          "Client_ID": {
+            "type": "long"
+          },
+          "Tag_ID": {
+            "type": "long"
+          }
+        }
+      },
+      "Deleted": {
+        "type": "nested",
+        "properties": {
+          "Article_Detail_ID": {
+            "type": "long"
+          },
+          "Client_ID": {
+            "type": "long"
+          },
+          "Article_Deleted_ID": {
+            "type": "long"
+          }
+        }
+      }
+    }
+  }
+}
